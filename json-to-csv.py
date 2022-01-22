@@ -3,16 +3,10 @@
 import json
 import csv
 
-with open('ls-withLicense1.json') as c:
-    licensedata = json.loads(c.read())
+# Contains whitespaces after commas, which will stay after splitting
 
-with open('ls-deps.json') as f:
-    data = json.loads(f.read())
-
-listofdependencies = []
 
 """Extract nested values from a JSON tree."""
-
 def json_extract(obj, key):
     """Recursively fetch values from nested JSON."""
     arr = []
@@ -33,60 +27,82 @@ def json_extract(obj, key):
     values = extract(obj, arr, key)
     return values
 
-print(len(json_extract(data, 'from')))
-print(len(json_extract(data, 'version')))
-print(len(json_extract(licensedata, 'repository')))
-print(len(json_extract(licensedata, 'licenses')))
-print(len(json_extract(data, 'resolved')))
+final_cut_pro_bro = []
 
-fromarr = json_extract(data, 'from')
-versionarr = json_extract(data, 'version')
-resolvedarr = json_extract(data, 'resolved')
+with open('node-postgres/test.json') as f:
+    data = json.loads(f.read())
 
-emptyarr = []
+resolves = json_extract(data, 'resolved')
 
-# print(json_extract(data, 'from')[0])
-count = 0
+with open('node-postgres/testWithLicence.csv') as c:
+    licensedata = csv.reader(c, delimiter=',')
+   
+    for x in licensedata:
+        lst = x[0].rsplit('@',1)
 
-for x in range(len(json_extract(data, 'from'))):
-    # creating temp array to sort the data
-    sortedarr = []
-    sortedarr.append(json_extract(data, 'from')[count])
-    sortedarr.append(json_extract(data, 'version')[count])
-    try:
-        sortedarr.append(json_extract(licensedata, 'repository')[count])
-    except IndexError:
-        # print('sorry, no 5') 
-        sortedarr.append(' ') 
-    try:
-        sortedarr.append(json_extract(licensedata, 'licenses')[count])
-    except IndexError:
-        # print('sorry, no 5') 
-        sortedarr.append(' ')
-    # if(json_extract(licensedata, 'repository')[count]):
-    #     sortedarr.append(json_extract(licensedata, 'repository')[count])
-    # else:
-    #     print("appending empty string")
-    #     sortedarr.append(' ')
-    # if(json_extract(licensedata, 'licenses')[count]):
-    #     sortedarr.append(json_extract(licensedata, 'licenses')[count])
-    # else:
-    #     print("appending empty string")
-    #     sortedarr.append(' ')
-    sortedarr.append(json_extract(data, 'resolved')[count])
-    # appending the sorted data to the emptyarr
-    emptyarr.append(sortedarr)
-    count += 1
+        if len(lst) > 1:
+            
+            resolve = ''
+        
+            for text in resolves:
 
-header = ['name', 'version', 'repository', 'licenses', 'url_to_source']
+                if lst[0] in text:
+                    resolve = text
 
-with open('rasldsepsd.csv', 'w', encoding='UTF8', newline='') as f:
+            final_cut_pro_bro.append([lst[0],lst[1],x[1],x[2],resolve])
+        
+
+header = ['name', 'version','licenses', 'repository', 'url_to_source']
+
+with open('final_cut_pro.csv', 'w', encoding='UTF8', newline='') as f:
     writer = csv.writer(f)
 
     # write the header
     writer.writerow(header)
 
     # write the data
-    writer.writerows(emptyarr)
+    writer.writerows(final_cut_pro_bro)
 
-# Why have we got 1230 repositories??
+# # print(len(json_extract(data, 'from')))
+# # print(len(json_extract(data, 'version')))
+# # print(len(json_extract(licensedata, 'repository')))
+# # print(len(json_extract(licensedata, 'licenses')))
+# # print(len(json_extract(data, 'resolved')))
+
+# # print(json_extract(data, 'from')[0])
+
+# emptydata = []
+# emptylicencedata = []
+
+# count = 0
+# # # for x in range(len(json_extract(data, 'version'))):
+# #     # creating temp array to sort the data
+# #     sortedata = []
+
+# #     # sortedata.append(json_extract(data, 'from')[count])
+# #     sortedata.append(json_extract(data, 'version')[count])
+# #     sortedata.append(json_extract(data, 'resolved')[count])
+
+# #     # # appending the sorted data to the emptyarr
+# #     emptydata.append(sortedata)
+# #     count += 1
+
+# count = 0
+
+# # for x in range(len(json_extract(data, 'version'))):
+# #     # creating temp array to sort the data
+# #     sortedlicensedata = []
+
+# #     sortedlicensedata.append(json_extract(licensedata, 'repository')[count])
+# #     sortedlicensedata.append(json_extract(licensedata, 'licenses')[count])
+
+# #     # # appending the sorted data to the emptyarr
+# #     emptylicencedata.append(sortedlicensedata)
+# #     count += 1
+
+# # print(emptydata[0])
+# # print(emptylicencedata[0])
+
+
+
+# # Why have we got 1230 repositories??
